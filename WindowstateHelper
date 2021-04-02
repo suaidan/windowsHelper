@@ -1,0 +1,18 @@
+private void WindowStateToMax()
+      {
+            Win32.POINT lMousePosition;
+            Win32.GetCursorPos(out lMousePosition);
+
+            IntPtr lPrimaryScreen = Win32.MonitorFromPoint(new Win32.POINT(0, 0), Win32.MonitorOptions.MONITOR_DEFAULTTOPRIMARY);
+            Win32.MONITORINFO lPrimaryScreenInfo = new Win32.MONITORINFO();
+            IntPtr lParam = new WindowInteropHelper(this).Handle;
+            if (Win32.GetMonitorInfo(lPrimaryScreen, lPrimaryScreenInfo) == false || IntPtr.Zero == lParam)
+            {
+                return;
+            }
+
+            Win32.SetWindowPos((new WindowInteropHelper(this)).Handle, new IntPtr(0),
+                lPrimaryScreenInfo.rcWork.Left, lPrimaryScreenInfo.rcWork.Top,
+                lPrimaryScreenInfo.rcWork.Right - lPrimaryScreenInfo.rcWork.Left,
+                lPrimaryScreenInfo.rcWork.Bottom - lPrimaryScreenInfo.rcWork.Top, Win32.SWP_SHOWWINDOW);
+        }
