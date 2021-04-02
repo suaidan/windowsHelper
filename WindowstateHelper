@@ -16,3 +16,41 @@ private void WindowStateToMax()
                 lPrimaryScreenInfo.rcWork.Right - lPrimaryScreenInfo.rcWork.Left,
                 lPrimaryScreenInfo.rcWork.Bottom - lPrimaryScreenInfo.rcWork.Top, Win32.SWP_SHOWWINDOW);
         }
+
+
+private void WmGetMinMaxInfo(IntPtr hwnd, IntPtr lParam)
+        {
+            Win32.POINT lMousePosition;
+            Win32.GetCursorPos(out lMousePosition);
+
+            IntPtr lPrimaryScreen = Win32.MonitorFromPoint(new Win32.POINT(0, 0), Win32.MonitorOptions.MONITOR_DEFAULTTOPRIMARY);
+            Win32.MONITORINFO lPrimaryScreenInfo = new Win32.MONITORINFO();
+            if (Win32.GetMonitorInfo(lPrimaryScreen, lPrimaryScreenInfo) == false)
+            {
+                return;
+            }
+
+            Win32.MonitorFromPoint(lMousePosition, Win32.MonitorOptions.MONITOR_DEFAULTTONEAREST);
+
+            Win32.MINMAXINFO lMmi = (Win32.MINMAXINFO)Marshal.PtrToStructure(lParam, typeof(Win32.MINMAXINFO));
+
+            lMmi.ptMaxPosition.X = lPrimaryScreenInfo.rcWork.Left;
+            lMmi.ptMaxPosition.Y = lPrimaryScreenInfo.rcWork.Top;
+
+            if (WindowState == WindowState.Normal)
+            {
+                return;
+            }
+
+            if (IsFullScreen)//全屏
+            {
+                lMmi.ptMaxSize.X = lPrimaryScreenInfo.rcMonitor.Right - lPrimaryScreenInfo.rcMonitor.Left;
+                lMmi.ptMaxSize.Y = lPrimaryScreenInfo.rcMonitor.Bottom - lPrimaryScreenInfo.rcMonitor.Top;
+            }
+            else//最大化
+            {
+                lMmi.ptMaxSize.X = lPrimaryScreenInfo.rcWork.Right - lPrimaryScreenInfo.rcWork.Left;
+                lMmi.ptMaxSize.Y = lPrimaryScreenInfo.rcWork.Bottom - lPrimaryScreenInfo.rcWork.Top;
+            }
+            Marshal.StructureToPtr(lMmi, lParam, true);
+        }
